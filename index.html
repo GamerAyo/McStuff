@@ -23,6 +23,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:fle
     <button data-page="generator">⚙️ <span>Command Generator</span></button>
     <button data-page="item">🎁 <span>Item / God Gear</span></button>
     <button data-page="mob">👾 <span>Mob Generator</span></button>
+    <button data-page="nbt">🧬 <span>NBT Builder</span></button>
     <button data-page="text">💬 <span>Text / Tellraw</span></button>
   </div>
   <div class="nav-title">Knowledge</div>
@@ -118,6 +119,72 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:fle
 <div class="output"><div id="mobOutput" class="code"></div><button class="btn copy" onclick="copyText('mobOutput')">Copy</button></div>
 </div></section>
 
+<section id="nbt" class="page">
+<div class="panel">
+  <div class="split">
+    <div><h3>🧬 NBT Builder — learn it without memorizing it</h3>
+      <div class="muted">Pick a common field, choose its data type, enter a number or characters, and CommandForge builds the SNBT for you.</div>
+    </div>
+    <span id="nbtStatus" class="status">Ready</span>
+  </div>
+
+  <div class="note" id="nbtVersionNote" style="margin-top:12px"></div>
+
+  <div class="grid3" style="margin-top:14px">
+    <div class="field"><label>What are you editing?</label><select id="nbtTargetKind" class="select">
+      <option value="entity">Entity / Mob NBT</option>
+      <option value="item">Item custom data</option>
+      <option value="block">Block Entity NBT</option>
+      <option value="storage">Command Storage NBT</option>
+    </select></div>
+    <div class="field"><label>Preset field</label><select id="nbtPreset" class="select"></select></div>
+    <div class="field"><label>Value type</label><select id="nbtType" class="select"></select></div>
+    <div class="field"><label>Key / field name</label><input id="nbtKey" class="input" placeholder="Custom key e.g. Owner or Uses"></div>
+    <div class="field"><label>Value</label><input id="nbtValue" class="input" placeholder="Example: 25 or DragonSlayer"></div>
+    <div class="field"><label>Numeric suffix</label><select id="nbtSuffix" class="select"><option value="">No suffix</option><option value="b">Byte (25b)</option><option value="s">Short (25s)</option><option value="L">Long (25L)</option><option value="f">Float (25f)</option><option value="d">Double (25d)</option></select></div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+    <button class="btn primary" onclick="nbtAddField()">＋ Add field</button>
+    <button class="btn" onclick="nbtClearFields()">Clear fields</button>
+    <button class="btn" onclick="nbtExample()">Load beginner example</button>
+  </div>
+
+  <div class="panel" style="margin-top:12px;background:var(--panel3)">
+    <div class="split"><h4 style="margin:0">Current fields</h4><span class="pill" id="nbtFieldCount">0 fields</span></div>
+    <div id="nbtFieldList" style="margin-top:10px"></div>
+  </div>
+
+  <div class="grid" style="margin-top:12px">
+    <div class="recipe-box">
+      <h4>Generated SNBT</h4>
+      <div id="nbtPreview" class="code">{}</div>
+      <button class="btn copy" style="position:static;margin-top:9px" onclick="copyText('nbtPreview')">Copy SNBT</button>
+    </div>
+    <div class="recipe-box">
+      <h4>Useful command</h4>
+      <div id="nbtCommand" class="code">Select a target type and add a field.</div>
+      <button class="btn copy" style="position:static;margin-top:9px" onclick="copyText('nbtCommand')">Copy command</button>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:12px">
+    <b>What NBT means:</b> NBT is Minecraft's structured data format. A number is not the same thing as text, and lists/compound objects can contain more NBT inside them. For modern item commands (1.20.5+), ordinary item-stack data uses components; custom arbitrary NBT-like data belongs in <code>custom_data</code> instead.
+  </div>
+
+  <div style="margin-top:12px">
+    <h4>Quick examples</h4>
+    <div class="chips">
+      <button class="chip" onclick="nbtQuick('NoAI','boolean','true')">NoAI = true</button>
+      <button class="chip" onclick="nbtQuick('Health','float','100')">Health = 100f</button>
+      <button class="chip" onclick="nbtQuick('Silent','boolean','true')">Silent = true</button>
+      <button class="chip" onclick="nbtQuick('CustomName','raw','{\"text\":\"Boss Zombie\"}')">CustomName = Boss Zombie</button>
+      <button class="chip" onclick="nbtQuick('Uses','int','25')">Uses = 25</button>
+      <button class="chip" onclick="nbtQuick('Tags','string_list','boss,elite')">Tags = [boss,elite]</button>
+    </div>
+  </div>
+</div>
+</section>
 <section id="text" class="page">
 <div class="panel"><h3>💬 Tellraw / JSON Text</h3><div class="grid3">
  <div class="field"><label>Target</label><select id="textTarget" class="select"></select></div>
@@ -144,7 +211,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:fle
 <section id="favorites" class="page"><div class="panel"><h3>⭐ Favorites</h3><div id="favoritesList" class="muted">No saved commands yet.</div></div></section>
 <section id="settings" class="page"><div class="panel"><h3>🛠️ Settings</h3><div class="note" style="margin-bottom:12px">Registry integrity: <span id="registryHealth">checking…</span></div><div class="grid"><div><h4>Interface</h4><button class="btn" onclick="document.body.classList.toggle('compact')">Toggle compact mode</button></div><div><h4>Local data</h4><button class="btn danger" onclick="clearAll()">Clear saved favorites</button></div></div><div class="note" style="margin-top:12px">CommandForge is a standalone HTML app. Your favorites stay in this browser using localStorage; the app does not require a server.</div></div></section>
 
-<footer>CommandForge • offline HTML • version-aware registry • curated Java registry with historical gates • Generated commands are templates and should be tested against the exact target Java release and server permissions.</footer>
+<footer>CommandForge • offline HTML • version-aware registry • historical NBT/SNBT helper • curated Java registry with historical gates • Generated commands are templates and should be tested against the exact target Java release and server permissions.</footer>
 </main></div>
 <div id="toast" class="toast"></div>
 
@@ -395,6 +462,38 @@ function fillItemSelect(){const group=val('itemCategory'),keep=val('itemSelect')
 function buildMob(){const id=val('mobSelect')||'zombie',data=ENTITIES.find(x=>x.name===id),extra=val('mobExtra');const tags=[`Health:${val('mobHealth')||100}f`,`PersistenceRequired:${val('mobPersist')==='true'}`,`Glowing:${val('mobGlow')==='true'}`,`Attributes:[{id:"minecraft:generic.max_health",base:${val('mobHealth')||100}},{id:"minecraft:generic.movement_speed",base:${val('mobSpeed')||.35}},{id:"minecraft:generic.attack_damage",base:${val('mobDamage')||10}},{id:"minecraft:generic.follow_range",base:${val('mobRange')||40}}]`];if(val('mobName'))tags.push(`CustomName:'${JSON.stringify({text:val('mobName')}).replace(/'/g,"\\'")}'`);if(extra)tags.push(extra);$('mobOutput').textContent=`/summon minecraft:${id} ${val('mobPos')||'~ ~ ~'} {${tags.join(',')}}`;$('mobStatus').textContent=data?`${data.kind} • since ${data.since}${data.until?' • through '+data.until:''}`:'Ready';$('mobVersionNote').innerHTML=data?`<span class="status">${data.since}${data.until?' → '+data.until:' → current'}</span> <span class="muted">Selected target: ${currentVersion()}</span>`:''}
 function fillMobSelect(){const keep=val('mobSelect');const arr=filteredMobs();setOptions($('mobSelect'),arr,keep&&arr.some(x=>x.name===keep)?keep:arr[0]?.name);buildMob()}
 
+
+/* NBT Builder */
+const NBT_PRESETS={
+  entity:[
+    ['CustomName','raw','Text component SNBT, e.g. {"text":"Boss Zombie"}'],['NoAI','boolean','Disables normal mob AI'],['Silent','boolean','Disables most entity sounds'],['Invulnerable','boolean','Entity cannot take normal damage'],['PersistenceRequired','boolean','Prevents normal despawn'],['Glowing','boolean','Adds glowing outline'],['CustomNameVisible','boolean','Always shows custom name'],['Health','float','Current health'],['Air','short','Remaining air'],['Fire','short','Fire ticks'],['FallDistance','float','Fall distance'],['Age','int','Age for ageable entities'],['LeftHanded','boolean','Mob left-handed flag'],['CanPickUpLoot','boolean','Can pick up loot'],['Tags','string_list','Entity tags list'],['Rotation','float_list','Yaw and pitch list'],['UUID','int_list','Four-integer UUID array'],['HandDropChances','float_list','Drop chance values'],['CustomKey','string','Enter your own key']
+  ],
+  item:[
+    ['owner','string','Custom owner label'],['rarity','string','Custom rarity label'],['Uses','int','Custom usage counter'],['Power','int','Custom integer stat'],['Level','int','Custom level'],['DurabilityBoost','float','Custom decimal stat'],['Untradeable','boolean','Custom true/false flag'],['Tags','string_list','Custom string list'],['CustomKey','string','Enter your own custom_data key']
+  ],
+  block:[
+    ['CustomName','string','Block entity custom name'],['Lock','string','Vanilla lock string'],['CustomKey','string','Enter your own block-entity key']
+  ],
+  storage:[
+    ['owner','string','Stored owner string'],['counter','int','Stored integer'],['enabled','boolean','Stored flag'],['values','int_list','Stored integer list'],['CustomKey','string','Enter your own storage key']
+  ]
+};
+const NBT_TYPES=[['string','Text / characters'],['byte','Byte number'],['short','Short number'],['int','Integer number'],['long','Long number'],['float','Decimal number (float)'],['double','Decimal number (double)'],['boolean','True / false'],['string_list','List of text'],['int_list','List of integers'],['float_list','List of decimals'],['raw','Raw SNBT value']];
+let nbtFields=[];
+function nbtTypeOptions(selected){return NBT_TYPES.map(x=>`<option value="${x[0]}" ${x[0]===selected?'selected':''}>${x[1]}</option>`).join('')}
+function fillNbtPresets(){const kind=val('nbtTargetKind')||'entity',arr=NBT_PRESETS[kind]||NBT_PRESETS.entity;const old=val('nbtPreset');$('nbtPreset').innerHTML=arr.map(x=>`<option value="${esc(x[0])}">${esc(x[0])} — ${esc(x[2])}</option>`).join('');if(arr.some(x=>x[0]===old))$('nbtPreset').value=old;else $('nbtPreset').value=arr[0][0];nbtPresetChanged()}
+function nbtPresetChanged(){const kind=val('nbtTargetKind')||'entity',preset=val('nbtPreset');const p=(NBT_PRESETS[kind]||[]).find(x=>x[0]===preset)||['CustomKey','string',''];$('nbtKey').value=preset==='CustomKey'?'':p[0];$('nbtType').innerHTML=nbtTypeOptions(preset==='Tags'?'string_list':p[1]);$('nbtValue').value='';$('nbtSuffix').value=p[1]==='float'?'f':p[1]==='double'?'d':p[1]==='long'?'L':p[1]==='int'?'':p[1]==='short'?'s':p[1]==='float_list'?'f':'';updateNbtUI()}
+function nbtEscapeString(v){return String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+function nbtValueToSnbt(type,value,suffix=''){const v=String(value??'').trim();if(type==='boolean')return /^(true|false)$/i.test(v)?v.toLowerCase():'false';if(type==='byte')return (/^[-+]?\d+$/.test(v)?v:'0')+'b';if(type==='short')return (/^[-+]?\d+$/.test(v)?v:'0')+'s';if(type==='int')return /^[-+]?\d+$/.test(v)?v:'0';if(type==='long')return (/^[-+]?\d+$/.test(v)?v:'0')+'L';if(type==='float')return (/^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?$/.test(v)?v:'0')+(suffix||'f');if(type==='double')return (/^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?$/.test(v)?v:'0')+(suffix||'d');if(type==='string')return `'${nbtEscapeString(v)}'`;if(type==='string_list')return `[${v.split(',').map(x=>`'${nbtEscapeString(x.trim())}'`).filter(x=>x!=="''").join(',')}]`;if(type==='int_list')return `[${v.split(',').map(x=>/^[-+]?\d+$/.test(x.trim())?x.trim():'0').join(',')}]`;if(type==='float_list')return `[${v.split(',').map(x=>/^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?$/.test(x.trim())?(x.trim()+(suffix||'f')):'0f').join(',')}]`;return v||'{}'}
+function updateNbtUI(){const type=val('nbtType'),v=val('nbtValue');$('nbtValue').placeholder=type==='string_list'?'red,blue,green':type==='int_list'?'1,2,3':type==='float_list'?'0.5,1.0,2.5':type==='raw'?'e.g. {foo:1,bar:[a,b]}':type==='boolean'?'true or false':type.includes('int')?'25':'Example: DragonSlayer';$('nbtSuffix').disabled=!['byte','short','float','double','float_list'].includes(type);const modern=modernItemSyntax();let note='NBT works as raw entity/block/storage data. ';if(val('nbtTargetKind')==='item'){note+=modern?'For 1.20.5+, this builder places arbitrary custom data under minecraft:custom_data; normal item properties should use item components.':'For pre-1.20.5 items, this becomes the classic item NBT tag.'}else note+='The generated data is shown as SNBT and can be used with the matching /summon or /data command.';$('nbtVersionNote').innerHTML=`<b>${currentVersion()}</b> — ${esc(note)}`}
+function renderNbtFields(){const list=$('nbtFieldList');$('nbtFieldCount').textContent=`${nbtFields.length} field${nbtFields.length===1?'':'s'}`;if(!nbtFields.length){list.innerHTML='<div class="muted">No fields yet. Pick a preset and press <b>Add field</b>.</div>'}else{list.innerHTML=nbtFields.map((f,i)=>`<div class="split" style="padding:8px 0;border-bottom:1px solid var(--border);gap:12px"><div><b>${esc(f.key)}</b><small class="muted" style="display:block">${esc(f.type)} → ${esc(f.snbt)}</small></div><button class="btn danger" onclick="nbtRemoveField(${i})">Remove</button></div>`).join('')}const body=nbtFields.map(f=>`${f.key}:${f.snbt}`).join(',');$('nbtPreview').textContent=body?`{${body}}`:'{}';const kind=val('nbtTargetKind');let cmd='';if(kind==='entity')cmd=compareVersion(currentVersion(),'1.13')>=0?`/data merge entity @s ${body?`{${body}}`:'{}'}`:`/summon minecraft:zombie ~ ~ ~ ${body?`{${body}}`:'{}'}`;if(kind==='block')cmd=compareVersion(currentVersion(),'1.13')>=0?`/data merge block ~ ~ ~ ${body?`{${body}}`:'{}'}`:'Use the generated SNBT with a block/entity command; /data is unavailable before 1.13.';if(kind==='storage')cmd=`/data modify storage commandforge:data set value ${body?`{${body}}`:'{}'}`;if(kind==='item'){const inner=body?`{${body}}`:'{}';if(modernItemSyntax())cmd=`/give @s minecraft:stick[custom_data=${inner}]`;else cmd=`/give @s minecraft:stick 1 ${inner}`} $('nbtCommand').textContent=cmd||'Add a field to generate a command.';$('nbtStatus').textContent=`${nbtFields.length} field${nbtFields.length===1?'':'s'} • ${currentVersion()}`}
+function nbtAddField(){let key=val('nbtKey')||val('nbtPreset')||'CustomKey';if(key==='CustomKey')key='custom_key';key=key.replace(/[^A-Za-z0-9_.$-]/g,'_');const type=val('nbtType')||'string',snbt=nbtValueToSnbt(type,val('nbtValue'),val('nbtSuffix'));nbtFields.push({key,type,snbt});renderNbtFields()}
+function nbtRemoveField(i){nbtFields.splice(i,1);renderNbtFields()}
+function nbtClearFields(){nbtFields=[];renderNbtFields()}
+function nbtQuick(key,type,value){$('nbtKey').value=key;$('nbtType').value=type;$('nbtValue').value=value;$('nbtSuffix').value=type==='float'?'f':'';nbtAddField()}
+function nbtExample(){nbtClearFields();$('nbtTargetKind').value='entity';fillNbtPresets();nbtQuick('NoAI','boolean','true');nbtQuick('Health','float','100');nbtQuick('Silent','boolean','true');nbtQuick('Tags','string_list','boss,elite')}
+function updateNbtUIAndRender(){updateNbtUI();renderNbtFields()}
+
 function updateText(){const o={text:val('textMsg')||'',color:val('textColor')||'white'};if($('boldBtn').classList.contains('on'))o.bold=true;if($('italicBtn').classList.contains('on'))o.italic=true;if($('underBtn').classList.contains('on'))o.underlined=true;if($('strikeBtn').classList.contains('on'))o.strikethrough=true;$('textOutput').textContent=`/tellraw ${val('textTarget')||'@a'} ${JSON.stringify(o)}`}
 
 function availableRecipes(){return RECIPES.filter(x=>available(x))}
@@ -412,13 +511,13 @@ function saveCurrent(){const arr=JSON.parse(localStorage.cfFav||'[]');arr.unshif
 function removeFav(i){const arr=JSON.parse(localStorage.cfFav||'[]');arr.splice(i,1);localStorage.cfFav=JSON.stringify(arr);renderFavorites()}
 function clearAll(){if(confirm('Clear all saved CommandForge favorites?')){localStorage.removeItem('cfFav');renderFavorites();toast('Favorites cleared')}}
 function applyPreset(type){showPage(type==='summon'?'mob':'generator');if(type==='summon'){$('mobSelect').value=filteredMobs().find(x=>x.name==='warden')?.name||filteredMobs()[0]?.name;buildMob();return}$('cmdType').value='give';dynamicFields();if(type==='speed'){$('cmdType').value='effect';dynamicFields()}if(type==='god_sword'){$('cmdType').value='give';dynamicFields();$('f_item').value=ITEM_DATA.find(x=>x.id.includes('netherite_sword')&&available(x))?'netherite_sword':'diamond_sword';$('f_extra').value=modernItemSyntax()?`enchantments={levels:{minecraft:sharpness:5,minecraft:looting:3,minecraft:fire_aspect:2,minecraft:unbreaking:3,minecraft:mending:1}}`:''}if(type==='god_pickaxe'){$('f_item').value=ITEM_DATA.find(x=>x.id==='netherite_pickaxe'&&available(x))?'netherite_pickaxe':'diamond_pickaxe';$('f_extra').value=modernItemSyntax()?`enchantments={levels:{minecraft:efficiency:5,minecraft:fortune:3,minecraft:unbreaking:3,minecraft:mending:1}}`:''}if(type==='armor'){$('cmdType').value='give';dynamicFields();$('f_item').value='diamond_chestplate'}generate()}
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));const b=document.querySelector(`[data-page="${id}"]`);$('pageTitle').textContent=b?b.innerText.replace(/^.\s/,'').trim():id;window.scrollTo(0,0);if(id==='recipes')renderRecipes();if(id==='enchants')renderEnchants();if(id==='registry')renderRegistry();if(id==='commands')renderCommands();if(id==='versions')renderVersionNotes();if(id==='content263')render26();if(id==='favorites')renderFavorites()}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));const b=document.querySelector(`[data-page="${id}"]`);$('pageTitle').textContent=b?b.innerText.replace(/^.\s/,'').trim():id;window.scrollTo(0,0);if(id==='recipes')renderRecipes();if(id==='enchants')renderEnchants();if(id==='registry')renderRegistry();if(id==='commands')renderCommands();if(id==='versions')renderVersionNotes();if(id==='content263')render26();if(id==='favorites')renderFavorites();if(id==='nbt'){fillNbtPresets();updateNbtUIAndRender()}}
 
-function refreshForVersion(){localStorage.cfVersion=currentVersion();fillCommandTypes();dynamicFields();fillItemCategories();fillMobSelect();itemEnchantButtons();renderEnchants();renderRecipes();renderRegistry();renderCommands();renderVersionNotes();render26();buildItem();buildMob();runRegistryChecks();const v=currentVersion();$('homeVersionNote').textContent=`Target ${v}. The registry uses exact numeric release comparisons, so content introduced in 1.21.9 or 1.21.11 will not appear in 1.21.4, and 26.3-only content stays hidden in every earlier release.`;$('statVersions').textContent=VERSION_LIST.length;$('statMobs').textContent=filteredMobs().length;$('statItems').textContent=filteredItems().length;$('statRecipes').textContent=availableRecipes().length}
+function refreshForVersion(){localStorage.cfVersion=currentVersion();fillCommandTypes();dynamicFields();fillItemCategories();fillMobSelect();itemEnchantButtons();renderEnchants();renderRecipes();renderRegistry();renderCommands();renderVersionNotes();render26();fillNbtPresets();updateNbtUIAndRender();buildItem();buildMob();runRegistryChecks();const v=currentVersion();$('homeVersionNote').textContent=`Target ${v}. The registry uses exact numeric release comparisons, so content introduced in 1.21.9 or 1.21.11 will not appear in 1.21.4, and 26.3-only content stays hidden in every earlier release.`;$('statVersions').textContent=VERSION_LIST.length;$('statMobs').textContent=filteredMobs().length;$('statItems').textContent=filteredItems().length;$('statRecipes').textContent=availableRecipes().length}
 
-function init(){fillVersions();fillTargets();fillCommandTypes();dynamicFields();fillItemCategories();fillMobSelect();itemEnchantButtons();renderVersionNotes();render26();renderRecipes();renderEnchants();renderRegistry();renderCommands();updateText();
+function init(){fillVersions();fillTargets();fillCommandTypes();dynamicFields();fillItemCategories();fillMobSelect();fillNbtPresets();itemEnchantButtons();renderVersionNotes();render26();renderRecipes();renderEnchants();renderRegistry();renderCommands();updateText();
  document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
- $('version').addEventListener('change',()=>{refreshForVersion();toast('Version changed to '+currentVersion())});$('cmdType').addEventListener('change',dynamicFields);$('target').addEventListener('input',generate);
+ $('version').addEventListener('change',()=>{refreshForVersion();toast('Version changed to '+currentVersion())});$('cmdType').addEventListener('change',dynamicFields);$('nbtTargetKind').addEventListener('change',()=>{fillNbtPresets();updateNbtUIAndRender()});$('nbtPreset').addEventListener('change',nbtPresetChanged);$('nbtType').addEventListener('change',updateNbtUI);$('nbtValue').addEventListener('input',updateNbtUI);$('nbtSuffix').addEventListener('change',updateNbtUI);$('target').addEventListener('input',generate);
  ['itemAmount','itemTarget','itemName','itemAttrPreset','itemAttr','itemModel','itemLore'].forEach(id=>$(id).addEventListener('input',buildItem));$('itemCategory').addEventListener('change',fillItemSelect);$('itemSelect').addEventListener('change',()=>{itemEnchantButtons();buildItem()});
  ['mobPos','mobName','mobHealth','mobSpeed','mobDamage','mobRange','mobPersist','mobGlow','mobExtra'].forEach(id=>$(id).addEventListener('input',buildMob));$('mobSelect').addEventListener('change',buildMob);
  ['textTarget','textMsg','textColor'].forEach(id=>$(id).addEventListener('input',updateText));['boldBtn','italicBtn','underBtn','strikeBtn'].forEach(id=>$(id).addEventListener('click',()=>{$(id).classList.toggle('on');updateText()}));
